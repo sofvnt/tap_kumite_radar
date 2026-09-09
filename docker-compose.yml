@@ -1,7 +1,7 @@
 
 services:
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.4.0
     container_name: tap-kafka
     hostname: kafka
     ports:
@@ -18,8 +18,19 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
 
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.1
+    container_name: tap-kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=TAP-Cluster
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
+    depends_on:
+      - kafka
+
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
     container_name: tap-elasticsearch
     environment:
       - discovery.type=single-node
@@ -29,7 +40,7 @@ services:
       - "9200:9200"
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.12.0
+    image: docker.elastic.co/kibana/kibana:8.11.1
     container_name: tap-kibana
     ports:
       - "5601:5601"
@@ -43,5 +54,8 @@ services:
     container_name: tap-spark
     user: root
     command: tail -f /dev/null
+    environment:                 
+      - TZ=Europe/Rome
     volumes:
       - ./:/app
+
