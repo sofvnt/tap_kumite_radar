@@ -1,34 +1,20 @@
-# 🥋 Kumite Analytics - Real-Time Computer Vision & Big Data
+# 🥋 Kumite Radar - Real-Time Sports Analytics
 
-Questo progetto implementa una pipeline Big Data in tempo reale per l'analisi tattica del Karate sportivo (Kumite).
+## 📖 Descrizione del Progetto
+Progetto finale per il corso di **Technologies for Advanced Programming** (TAP) - Università degli Studi di Catania.
 
-## 🏗️ Architettura
-L'infrastruttura è interamente dockerizzata e sfrutta un'architettura **Edge-to-Broker**:
-1. **Edge (Ingestion):** `tracker.py` utilizza **YOLOv8** per estrarre i bounding boxes degli atleti da un flusso video e funge da Producer inviando i dati spaziali in JSON direttamente a Kafka (30 fps).
-2. **Streaming & Processing:** Apache Spark (Structured Streaming) consuma i messaggi da Kafka, calcola la distanza tra i lottatori e il **Dominio del Centro** in tempo reale.
-3. **Storage & Data Viz:** I dati arricchiti vengono indicizzati su Elasticsearch e visualizzati dinamicamente tramite una dashboard in streaming su Kibana.
+"Kumite Radar" è una pipeline architetturale di stream processing progettata per l'analisi tattica in tempo reale degli incontri di Karate (specialità Kumite). Il sistema traccia i movimenti degli atleti (AKA e AO) tramite Computer Vision (YOLOv8) e utilizza algoritmi di Machine Learning in streaming per classificare dinamicamente le fasi del combattimento (es. "Fase di Studio" vs "Fase di Ingaggio").
 
-## 🚀 Come avviare il progetto
+## 🏗️ Architettura e Tecnologie
+L'intera infrastruttura è a microservizi, orchestrata tramite **Docker Compose** e progettata per garantire fault-tolerance e disaccoppiamento tra produzione, calcolo e visualizzazione dei dati.
 
-**1. Avviare l'infrastruttura Docker**
-```bash
-docker compose up -d
+* **Computer Vision (Source):** YOLOv8 + OpenCV
+* **Data Ingestion & Buffering:** Apache Kafka (KRaft mode) + Python Custom Producer
+* **Real-Time Processing & ML:** Apache Spark (Structured Streaming) + Spark MLlib 
+* **Indexing & Storage:** Elasticsearch
+* **Data Visualization:** Kibana
 
-
-
-2. Avviare la pipeline Spark
-Attendere che i container siano attivi, quindi lanciare:
-
-docker exec -w /app tap-spark /opt/spark/bin/spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1,org.elasticsearch:elasticsearch-spark-30_2.12:8.12.0 spark_processor.py
-
-
-
-3. Avviare l'ingestion video (YOLO)
-In un terminale separato locale, avviare:
-
-python tracker.py
-
-
-
-4. Visualizzazione
-Aprire Kibana all'indirizzo http://localhost:5601 e visualizzare i dati del kumite_index.
+## ⭐ Requisiti "Plus" Soddisfatti
+In linea con la griglia di valutazione del corso, il progetto include le seguenti implementazioni avanzate:
+1. **Machine Learning in Streaming:** Applicazione del clustering **K-Means** (MLlib) in tempo reale su micro-batch (Tumbling Windows da 3 secondi) per classificare dinamicamente le fasi del match senza regole prefissate.
+2. **Ecosistema Docker:** Architettura interamente containerizzata con risoluzione DNS interna, gestione coordinata del fuso orario (`TZ=Europe/Rome`) e *version pinning* rigoroso dei container.
